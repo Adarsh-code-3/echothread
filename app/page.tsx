@@ -117,12 +117,20 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-muted dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors text-sm font-medium">How It Works</a>
             <a href="#privacy" className="text-muted dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors text-sm font-medium">Privacy</a>
           </div>
-          <Link
-            href="/dashboard"
-            className="px-5 py-2.5 bg-gradient-to-r from-coral-500 to-coral-400 text-white text-sm font-medium rounded-full hover:shadow-lg hover:shadow-coral-500/25 transition-all duration-300 active:scale-[0.97]"
-          >
-            Open App
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="px-5 py-2.5 text-sm font-medium text-ink dark:text-white hover:text-coral-500 transition-colors"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/register"
+              className="px-5 py-2.5 bg-gradient-to-r from-coral-500 to-coral-400 text-white text-sm font-medium rounded-full hover:shadow-lg hover:shadow-coral-500/25 transition-all duration-300 active:scale-[0.97]"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -169,10 +177,10 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
             <Link
-              href="/dashboard"
+              href="/register"
               className="px-8 py-4 bg-gradient-to-r from-coral-500 to-coral-400 text-white font-semibold rounded-2xl hover:shadow-xl hover:shadow-coral-500/25 transition-all duration-300 active:scale-[0.97] text-lg min-h-[52px] flex items-center gap-2"
             >
-              Try the Experience
+              Start Your Journal
               <ChevronRight className="w-5 h-5" />
             </Link>
             <a
@@ -385,7 +393,7 @@ export default function LandingPage() {
               Every day that passes is a story untold. Start capturing yours in 30 seconds.
             </p>
             <Link
-              href="/dashboard"
+              href="/register"
               className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-coral-500 to-coral-400 text-white font-semibold rounded-2xl hover:shadow-xl hover:shadow-coral-500/25 transition-all duration-300 active:scale-[0.97] text-lg"
             >
               <Mic className="w-5 h-5" />
