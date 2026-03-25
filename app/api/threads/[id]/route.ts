@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
-import { eq } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
+import { getCurrentUser } from "@/lib/auth"
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
     const [thread] = await db
       .select()
       .from(threads)
-      .where(eq(threads.id, params.id))
+      .where(and(eq(threads.id, params.id), eq(threads.userId, user.id)))
       .limit(1)
 
     if (!thread) {
@@ -30,9 +34,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
     const [deleted] = await db
       .delete(threads)
-      .where(eq(threads.id, params.id))
+      .where(and(eq(threads.id, params.id), eq(threads.userId, user.id)))
       .returning()
 
     if (!deleted) {

@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
-import { desc } from "drizzle-orm"
+import { desc, eq, and } from "drizzle-orm"
 import { detectMood, extractTags, polishText, generateSummary, generateInsight } from "@/lib/ai"
+import { getCurrentUser } from "@/lib/auth"
 
 export async function GET() {
   try {
-    const allThreads = await db.select().from(threads).orderBy(desc(threads.createdAt))
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
+    const allThreads = await db
+      .select()
+      .from(threads)
+      .where(eq(threads.userId, user.id))
+      .orderBy(desc(threads.createdAt))
+
     return NextResponse.json(allThreads)
   } catch (error) {
     console.error("Failed to fetch threads:", error)
@@ -16,6 +25,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
     const body = await req.json()
     const { transcript, audioData, duration } = body as {
       transcript: string
@@ -27,7 +39,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Transcript is required" }, { status: 400 })
     }
 
-    // AI processing
     const polished = polishText(transcript)
     const summary = generateSummary(polished)
     const { mood, score } = detectMood(transcript)
@@ -35,6 +46,7 @@ export async function POST(req: NextRequest) {
     const insight = generateInsight(transcript, mood, tags)
 
     const [newThread] = await db.insert(threads).values({
+      userId: user.id,
       transcript: transcript.trim(),
       polished,
       summary,

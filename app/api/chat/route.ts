@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
-import { desc } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { searchThreadsForChat } from "@/lib/ai"
+import { getCurrentUser } from "@/lib/auth"
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
     const { message } = (await req.json()) as { message: string }
 
     if (!message || message.trim().length === 0) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 })
     }
 
-    const allThreads = await db.select().from(threads).orderBy(desc(threads.createdAt))
+    const allThreads = await db
+      .select()
+      .from(threads)
+      .where(eq(threads.userId, user.id))
+      .orderBy(desc(threads.createdAt))
 
     if (allThreads.length === 0) {
       return NextResponse.json({

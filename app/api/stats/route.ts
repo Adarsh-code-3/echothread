@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
-import { desc, gte } from "drizzle-orm"
+import { desc, gte, eq, and } from "drizzle-orm"
+import { getCurrentUser } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfWeek = new Date(now)
@@ -16,10 +20,9 @@ export async function GET() {
     const monthThreads = await db
       .select()
       .from(threads)
-      .where(gte(threads.createdAt, startOfMonth))
+      .where(and(eq(threads.userId, user.id), gte(threads.createdAt, startOfMonth)))
       .orderBy(desc(threads.createdAt))
 
-    // Calculate streak
     const dates = new Set(monthThreads.map(t => new Date(t.createdAt).toDateString()))
     let streak = 0
     for (let i = 0; i < 31; i++) {
@@ -32,24 +35,16 @@ export async function GET() {
       }
     }
 
-    // Top mood this month
     const moodCounts: Record<string, number> = {}
     for (const t of monthThreads) {
       moodCounts[t.mood] = (moodCounts[t.mood] || 0) + 1
     }
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "calm"
 
-    // Weekly moods
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const moodColorMap: Record<string, string> = {
-      joyful: "#FBBF24",
-      calm: "#60A5FA",
-      reflective: "#A78BFA",
-      grateful: "#F9A825",
-      excited: "#FB923C",
-      sad: "#94A3B8",
-      anxious: "#F87171",
-      neutral: "#D1D5DB",
+      joyful: "#FBBF24", calm: "#60A5FA", reflective: "#A78BFA", grateful: "#F9A825",
+      excited: "#FB923C", sad: "#94A3B8", anxious: "#F87171", neutral: "#D1D5DB",
     }
 
     const weeklyMoods = dayNames.map((day, i) => {
@@ -59,12 +54,7 @@ export async function GET() {
         t => new Date(t.createdAt).toDateString() === date.toDateString()
       )
       const mood = dayThreads.length > 0 ? dayThreads[0]!.mood : "neutral"
-      return {
-        day,
-        mood,
-        color: moodColorMap[mood] || "#D1D5DB",
-        hasEntry: dayThreads.length > 0,
-      }
+      return { day, mood, color: moodColorMap[mood] || "#D1D5DB", hasEntry: dayThreads.length > 0 }
     })
 
     return NextResponse.json({
