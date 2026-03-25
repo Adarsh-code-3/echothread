@@ -2,8 +2,21 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Play, Clock } from "lucide-react"
-import type { Thread } from "@/lib/mock-data"
+import { Clock } from "lucide-react"
+
+export interface ThreadCardData {
+  id: string
+  date: string
+  time: string
+  duration: number
+  transcript: string
+  polished: string
+  summary: string
+  mood: string
+  moodScore: number
+  tags: { name: string; category: string; color: string }[]
+  insight: string
+}
 
 const moodColors: Record<string, string> = {
   joyful: "bg-amber-400",
@@ -28,17 +41,17 @@ const moodLabels: Record<string, string> = {
 }
 
 const moodBadgeColors: Record<string, string> = {
-  joyful: "bg-amber-50 text-amber-700",
-  calm: "bg-blue-50 text-blue-700",
-  reflective: "bg-purple-50 text-purple-700",
-  grateful: "bg-amber-50 text-amber-700",
-  excited: "bg-orange-50 text-orange-700",
-  sad: "bg-slate-50 text-slate-700",
-  anxious: "bg-red-50 text-red-700",
-  neutral: "bg-gray-50 text-gray-700",
+  joyful: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  calm: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  reflective: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  grateful: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  excited: "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  sad: "bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300",
+  anxious: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  neutral: "bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300",
 }
 
-export default function ThreadCard({ thread, index = 0 }: { thread: Thread; index?: number }) {
+export default function ThreadCard({ thread, index = 0 }: { thread: ThreadCardData; index?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,11 +59,11 @@ export default function ThreadCard({ thread, index = 0 }: { thread: Thread; inde
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
     >
       <Link href={`/thread?id=${thread.id}`}>
-        <div className="bg-white rounded-2xl p-5 border border-orange-50 shadow-sm hover:shadow-md hover:border-coral-500/20 transition-all duration-300 group cursor-pointer">
+        <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-orange-50 dark:border-white/10 shadow-sm hover:shadow-md hover:border-coral-500/20 transition-all duration-300 group cursor-pointer">
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-2.5 h-2.5 rounded-full ${moodColors[thread.mood] || "bg-gray-400"}`} />
-            <span className="text-sm text-muted">{thread.time}</span>
-            <div className="flex items-center gap-1 text-xs text-muted">
+            <span className="text-sm text-muted dark:text-gray-400">{thread.time}</span>
+            <div className="flex items-center gap-1 text-xs text-muted dark:text-gray-500">
               <Clock className="w-3 h-3" />
               {thread.duration}s
             </div>
@@ -59,7 +72,7 @@ export default function ThreadCard({ thread, index = 0 }: { thread: Thread; inde
             </span>
           </div>
 
-          <p className="font-serif text-ink text-[15px] leading-relaxed line-clamp-2 mb-3 group-hover:text-coral-600 transition-colors duration-200">
+          <p className="font-serif text-ink dark:text-gray-200 text-[15px] leading-relaxed line-clamp-2 mb-3 group-hover:text-coral-600 dark:group-hover:text-coral-400 transition-colors duration-200">
             {thread.summary}
           </p>
 
