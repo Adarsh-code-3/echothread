@@ -3,6 +3,8 @@ import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
 import { desc, gte } from "drizzle-orm"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     const now = new Date()
