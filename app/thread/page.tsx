@@ -4,7 +4,8 @@ import { useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowLeft, Play, Pause, Clock, Lightbulb } from "lucide-react"
+import { ArrowLeft, Play, Pause, Clock, Lightbulb, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import Navigation from "@/components/Navigation"
 import { moodBadgeColors, moodLabels } from "@/components/ThreadCard"
 
@@ -29,15 +30,34 @@ function ThreadContent() {
   const [loading, setLoading] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [deleting, setDeleting] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const router = useRouter()
+
+  const handleDelete = async () => {
+    if (!thread || deleting) return
+    if (!window.confirm("Delete this thread? This cannot be undone.")) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/threads/${thread.id}`, { method: "DELETE" })
+      if (res.ok) {
+        router.push("/dashboard")
+      }
+    } catch {
+      setDeleting(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchThread() {
       try {
-        const res = await fetch("/api/threads")
-        const threads: ThreadData[] = await res.json()
-        const found = threads.find((t) => t.id === id)
-        if (found) setThread(found)
+        const res = await fetch(`/api/threads/${id}`)
+        if (!res.ok) {
+          setLoading(false)
+          return
+        }
+        const data: ThreadData = await res.json()
+        setThread(data)
       } catch (err) {
         console.error("Failed to fetch thread:", err)
       } finally {
@@ -64,6 +84,9 @@ function ThreadContent() {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
+        audioRef.current.onended = null
+        audioRef.current.ontimeupdate = null
+        audioRef.current.src = ""
         audioRef.current = null
       }
     }
@@ -114,13 +137,23 @@ function ThreadContent() {
       <Navigation />
 
       <main className="max-w-2xl mx-auto px-4 pt-20 md:pt-24">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-muted dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors mb-6 text-sm font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to timeline
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 text-muted dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to timeline
+          </Link>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="inline-flex items-center gap-1.5 text-sm text-muted dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" />
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -166,7 +199,7 @@ function ThreadContent() {
             </div>
             <div className="flex items-center gap-1 text-sm text-muted dark:text-gray-400 flex-shrink-0">
               <Clock className="w-3.5 h-3.5" />
-              0:{thread.duration.toString().padStart(2, "0")}
+              {Math.floor(thread.duration / 60)}:{(thread.duration % 60).toString().padStart(2, "0")}
             </div>
           </div>
         </motion.div>

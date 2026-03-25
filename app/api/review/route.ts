@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { threads } from "@/lib/schema"
-import { desc, gte, lte } from "drizzle-orm"
+import { desc, gte } from "drizzle-orm"
 
 export const dynamic = "force-dynamic"
 

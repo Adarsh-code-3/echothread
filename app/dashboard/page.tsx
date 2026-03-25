@@ -83,19 +83,23 @@ export default function DashboardPage() {
   const [threads, setThreads] = useState<ThreadData[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const fetchData = useCallback(async () => {
     try {
+      setError(false)
       const [threadsRes, statsRes] = await Promise.all([
         fetch("/api/threads"),
         fetch("/api/stats"),
       ])
+      if (!threadsRes.ok || !statsRes.ok) throw new Error("API error")
       const threadsData = await threadsRes.json()
       const statsData = await statsRes.json()
-      setThreads(threadsData)
+      setThreads(Array.isArray(threadsData) ? threadsData : [])
       setStats(statsData)
     } catch (err) {
       console.error("Failed to fetch data:", err)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -219,8 +223,25 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Error state */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-8 mb-6"
+          >
+            <p className="text-red-500 dark:text-red-400 text-sm mb-2">Something went wrong loading your threads.</p>
+            <button
+              onClick={fetchData}
+              className="text-coral-500 text-sm font-medium hover:underline"
+            >
+              Try again
+            </button>
+          </motion.div>
+        )}
+
         {/* Empty state */}
-        {!loading && threads.length === 0 && (
+        {!loading && !error && threads.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

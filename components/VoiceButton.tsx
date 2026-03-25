@@ -19,6 +19,23 @@ export default function VoiceButton({ onThreadCreated }: VoiceButtonProps) {
   const recognitionRef = useRef<any>(null)
   const transcriptRef = useRef("")
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort() } catch {}
+        recognitionRef.current = null
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        try {
+          mediaRecorderRef.current.stop()
+          mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop())
+        } catch {}
+        mediaRecorderRef.current = null
+      }
+    }
+  }, [])
+
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (state === "recording") {

@@ -76,10 +76,10 @@ export default function AskPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0] dark:bg-[#0F0F14] flex flex-col transition-colors">
+    <div className="min-h-screen bg-cream dark:bg-[#0F0F14] flex flex-col transition-colors">
       <Navigation />
 
-      <div className="fixed top-0 left-0 right-0 z-40 bg-[#FFF8F0]/90 dark:bg-[#0F0F14]/90 backdrop-blur-xl border-b border-orange-100/50 dark:border-white/10 md:top-16">
+      <div className="fixed top-0 left-0 right-0 z-40 bg-cream/90 dark:bg-[#0F0F14]/90 backdrop-blur-xl border-b border-orange-100/50 dark:border-white/10 md:top-16">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link href="/dashboard" className="text-muted dark:text-gray-400 hover:text-ink dark:hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -168,7 +168,7 @@ export default function AskPage() {
         )}
       </main>
 
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-[#FFF8F0]/90 dark:bg-[#0F0F14]/90 backdrop-blur-xl border-t border-orange-100/50 dark:border-white/10 p-4">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-cream/90 dark:bg-[#0F0F14]/90 backdrop-blur-xl border-t border-orange-100/50 dark:border-white/10 p-4">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <input
             ref={inputRef}
